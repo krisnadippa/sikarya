@@ -36,7 +36,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   useEffect(() => {
     const user = ApiClient.getCurrentUser();
     if (!user) {
-      router.push("/login");
+      router.replace("/login");
       return;
     }
     setCurrentUser(user);
@@ -44,7 +44,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   const handleLogout = async () => {
     await ApiClient.logout();
-    router.push("/login");
+    router.replace("/login");
   };
 
   const getRoleBadge = (role?: string) => {

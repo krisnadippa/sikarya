@@ -58,7 +58,7 @@ export default function DashboardUmumPage() {
   useEffect(() => {
     const user = ApiClient.getCurrentUser();
     if (!user || (user.role !== "bendahara_umum" && user.role !== "super_admin")) {
-      router.push("/login");
+      router.replace("/login");
       return;
     }
     setCurrentUser(user);
@@ -93,6 +93,17 @@ export default function DashboardUmumPage() {
   };
 
   const kasUmumSection = sections.find((s) => s.section_code === "KAS-01") || sections[0];
+
+  if (!currentUser) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-2.5">
+          <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-xs text-gray-500 font-medium">Memverifikasi otentikasi...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <DashboardLayout

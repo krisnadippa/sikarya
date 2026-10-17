@@ -31,7 +31,7 @@ export class ApiClient {
   private static transactions: Transaction[] = [...initialTransactions];
   private static puniaList: PuniaDonation[] = [...initialPuniaDonations];
   private static usersList: User[] = [...initialUsers];
-  private static currentUser: User = initialUsers[1]; // Default: Bendahara Umum
+  private static currentUser: User | null = null;
   private static cache: Map<string, { data: any; expiry: number }> = new Map();
 
   private static getCached<T>(key: string): T | null {
@@ -78,14 +78,7 @@ export class ApiClient {
   }
 
   static async fetchWithAuth(url: string, options: RequestInit = {}): Promise<Response> {
-    let token = this.getToken();
-    if (!token) {
-      const user = this.getCurrentUser();
-      if (user && user.username) {
-        await this.login(user.username, "dalemmetra2026");
-        token = this.getToken();
-      }
-    }
+    const token = this.getToken();
 
     const headers: Record<string, string> = {
       ...((options.headers as Record<string, string>) || {}),
@@ -94,43 +87,34 @@ export class ApiClient {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    let res = await fetch(url, {
+    const res = await fetch(url, {
       ...options,
       headers,
       credentials: "include",
     });
 
     if (res.status === 401) {
-      const user = this.getCurrentUser();
-      if (user && user.username) {
-        const loginRes = await this.login(user.username, "dalemmetra2026");
-        if (loginRes.success) {
-          const freshToken = this.getToken();
-          if (freshToken) {
-            headers["Authorization"] = `Bearer ${freshToken}`;
-          }
-          res = await fetch(url, {
-            ...options,
-            headers,
-            credentials: "include",
-          });
-        }
-      }
+      this.setToken(null);
+      this.setCurrentUser(null);
     }
 
     return res;
   }
 
-  static setCurrentUser(user: User) {
+  static setCurrentUser(user: User | null) {
     this.currentUser = user;
     if (typeof window !== "undefined") {
       try {
-        localStorage.setItem("sikarya_user", JSON.stringify(user));
+        if (user) {
+          localStorage.setItem("sikarya_user", JSON.stringify(user));
+        } else {
+          localStorage.removeItem("sikarya_user");
+        }
       } catch {}
     }
   }
 
-  static getCurrentUser(): User {
+  static getCurrentUser(): User | null {
     if (typeof window !== "undefined") {
       try {
         const stored = localStorage.getItem("sikarya_user");
@@ -138,9 +122,16 @@ export class ApiClient {
           const parsed = JSON.parse(stored);
           if (parsed && parsed.username) {
             this.currentUser = parsed;
+            return parsed;
           }
+        } else {
+          this.currentUser = null;
+          return null;
         }
-      } catch {}
+      } catch {
+        this.currentUser = null;
+        return null;
+      }
     }
     return this.currentUser;
   }
@@ -204,12 +195,14 @@ export class ApiClient {
       });
     } catch {}
     this.setToken(null);
+    this.setCurrentUser(null);
     if (typeof window !== "undefined") {
       try {
         localStorage.removeItem("sikarya_user");
+        localStorage.removeItem("sikarya_token");
       } catch {}
     }
-    this.currentUser = initialUsers[1];
+    this.currentUser = null;
   }
 
   static async getSections(): Promise<Section[]> {
@@ -294,11 +287,12 @@ export class ApiClient {
       : `${sec.section_code.replace("-", "")}-${data.type === "expense" ? "NT" : "TR"}${String(countSec).padStart(2, "0")}`;
 
     const maxId = this.transactions.reduce((max, t) => (t.id > max ? t.id : max), 0);
+    const activeUser = this.getCurrentUser();
     const newId = maxId + 1;
     const newTx: Transaction = {
       id: newId,
       section_id: data.section_id,
-      user_id: this.currentUser.id,
+      user_id: activeUser ? activeUser.id : 1,
       date: data.date,
       description: data.description,
       ref_no: ref_no,
@@ -309,7 +303,7 @@ export class ApiClient {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       section: sec,
-      user: this.currentUser,
+      user: activeUser || undefined,
     };
 
     // Auto-Ledger Sync: If Kas Umum expense has target_section_id
@@ -326,7 +320,7 @@ export class ApiClient {
         const linkedTx: Transaction = {
           id: linkedTxId,
           section_id: targetSec.id,
-          user_id: this.currentUser.id,
+          user_id: activeUser ? activeUser.id : 1,
           date: data.date,
           description: `[Alokasi dari Kas Umum - Ref: ${newTx.ref_no}] ${data.description}`,
           ref_no: targetRefNo,
@@ -338,7 +332,7 @@ export class ApiClient {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           section: targetSec,
-          user: this.currentUser,
+          user: activeUser || undefined,
           linked_transaction: {
             id: newId,
             ref_no: newTx.ref_no,
@@ -559,10 +553,11 @@ export class ApiClient {
     }
 
     const maxId = this.puniaList.reduce((max, p) => (p.id > max ? p.id : max), 0);
+    const activeUser = this.getCurrentUser();
     const newId = maxId + 1;
     const newEntry: PuniaDonation = {
       id: newId,
-      user_id: this.currentUser.id,
+      user_id: activeUser ? activeUser.id : 1,
       date: data.date,
       donor_name: data.donor_name,
       donation_type: data.donation_type,
@@ -571,12 +566,14 @@ export class ApiClient {
       goods_quantity: data.goods_quantity || null,
       notes: data.notes || null,
       created_at: new Date().toISOString(),
-      staff: {
-        id: this.currentUser.id,
-        username: this.currentUser.username,
-        full_name: this.currentUser.full_name,
-        role: this.currentUser.role,
-      },
+      staff: activeUser
+        ? {
+            id: activeUser.id,
+            username: activeUser.username,
+            full_name: activeUser.full_name,
+            role: activeUser.role,
+          }
+        : undefined,
     };
     this.puniaList.unshift(newEntry);
     return newEntry;

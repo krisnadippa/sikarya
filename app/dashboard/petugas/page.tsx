@@ -14,11 +14,22 @@ export default function DashboardPetugasPage() {
   useEffect(() => {
     const user = ApiClient.getCurrentUser();
     if (!user || (user.role !== "petugas_punia" && user.role !== "super_admin" && user.role !== "panitia_punia")) {
-      router.push("/login");
+      router.replace("/login");
       return;
     }
     setCurrentUser(user);
   }, [router]);
+
+  if (!currentUser) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center gap-2.5">
+          <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-xs text-gray-500 font-medium">Memverifikasi otentikasi...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <DashboardLayout

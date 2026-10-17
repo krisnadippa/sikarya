@@ -120,41 +120,43 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
 
   return (
     <div className="w-full min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col">
-      {/* TOP NAVBAR (DESKTOP & MOBILE RESPONSIVE) */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* Logo & Title */}
-          <div className="flex items-center gap-3">
+      {/* TOP NAVBAR (DESKTOP & MOBILE RESPONSIVE - ANTI MENUMPUK DI SEMUA HP) */}
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-2xs">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-0 sm:h-16 min-h-[58px] flex items-center justify-between gap-2">
+          {/* Logo & Title Identity */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
             <Image
               src="/logo_hitam.png"
               alt="Logo SIKARYA Pura Dalem Metra"
-              width={56}
-              height={46}
-              className="h-11 sm:h-12 w-auto object-contain shrink-0"
+              width={48}
+              height={40}
+              className="h-8.5 sm:h-11 w-auto object-contain shrink-0"
               priority
             />
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">
-                  SIKARYA PURA DALEM METRA
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-xs sm:text-base font-extrabold text-slate-900 tracking-tight truncate leading-tight">
+                  <span className="sm:hidden">SIKARYA METRA</span>
+                  <span className="hidden sm:inline">SIKARYA PURA DALEM METRA</span>
                 </h1>
-                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 shrink-0">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                   Live Sync
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 font-medium">
-                Portal Transparansi Keuangan & Dana Punia Krama Desa Adat
+              <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium truncate leading-tight mt-0.5">
+                <span className="sm:hidden">Pura Dalem Desa Adat Metra</span>
+                <span className="hidden sm:inline">Portal Transparansi Keuangan & Dana Punia Krama Desa Adat</span>
               </p>
             </div>
           </div>
 
           {/* Right Status Badge & Kiosk Link */}
-          <div className="flex items-center gap-2 sm:gap-2.5">
-            <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-emerald-200 shadow-xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+            <div className="inline-flex items-center gap-1.5 text-[10.5px] sm:text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-emerald-200/80 shadow-2xs whitespace-nowrap">
+              <span className="w-1.5 sm:w-2 h-1.5 sm:h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
               <span>Terbuka & Transparan</span>
-            </span>
+            </div>
             <Link
               href="/kiosk"
               className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-amber-700 bg-white hover:bg-amber-50/60 px-3 py-1.5 rounded-full border border-slate-200 hover:border-amber-300 shadow-2xs transition-all"
@@ -168,19 +170,19 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
       </header>
 
       {/* HERO BANNER & KPI METRICS */}
-      <section className="bg-gradient-to-b from-white to-slate-100 border-b border-slate-200 py-6 sm:py-8 lg:py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <section className="bg-gradient-to-b from-white to-slate-100 border-b border-slate-200 py-5 sm:py-8 lg:py-10">
+        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 space-y-4 sm:space-y-6">
           {/* Header Introduction */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-4">
             <div>
               <div className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-800 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200 mb-2">
                 <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
                 <span>Keterbukaan Publik & Akuntabilitas Penuh</span>
               </div>
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">
+              <h2 className="text-lg sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">
                 Ringkasan Kas Karya & Donasi Umat
               </h2>
-              <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mt-1">
+              <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mt-1 leading-relaxed">
                 Seluruh alokasi dana, realisasi pengeluaran setiap seksi, dan catatan punia krama dapat dipantau langsung secara terbuka oleh seluruh umat.
               </p>
             </div>
@@ -192,9 +194,9 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
           </div>
 
           {/* 4-COLUMN KPI CARDS (RESPONSIVE: 1 col on mobile, 2 on tablet, 4 on desktop) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {/* Card 1: Grand Total Cash */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-2xs flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
                   <span>Grand Total Kas</span>
@@ -211,7 +213,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             </div>
 
             {/* Card 2: Total Punia Umat */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-2xs flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
                   <span>Total Punia Umat</span>
@@ -228,7 +230,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             </div>
 
             {/* Card 3: Total Pemasukan Kas */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-2xs flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
                   <span>Total Penerimaan</span>
@@ -244,7 +246,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             </div>
 
             {/* Card 4: Total Pengeluaran Kas */}
-            <div className="bg-white p-4 sm:p-5 rounded-lg border border-slate-200 shadow-sm flex flex-col justify-between">
+            <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-2xs flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">
                   <span>Total Realisasi Biaya</span>
@@ -263,10 +265,10 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
       </section>
 
       {/* MAIN CONTENT SECTION */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-5 sm:space-y-6">
         {/* TABS SELECTOR (HORIZONTAL SCROLLABLE ON MOBILE, PILLS ON DESKTOP) */}
-        <div className="bg-white border border-slate-200 rounded-lg p-2 shadow-sm">
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar text-xs">
+        <div className="bg-white border border-slate-200 rounded-xl p-1.5 sm:p-2 shadow-2xs">
+          <div className="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-xs">
             {sections.map((sec) => {
               const isSelected = activeTab === sec.section_code;
               const isKas = sec.section_code === "KAS-01";
@@ -275,9 +277,9 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                 <button
                   key={sec.id}
                   onClick={() => setActiveTab(sec.section_code)}
-                  className={`px-3 sm:px-4 py-2 rounded-md font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+                  className={`px-3 sm:px-4 py-2 rounded-lg font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
                     isSelected
-                      ? "bg-slate-900 text-white shadow-sm"
+                      ? "bg-slate-900 text-white shadow-xs"
                       : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                   }`}
                 >
@@ -290,9 +292,9 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             {/* Punia Tab */}
             <button
               onClick={() => setActiveTab("punia")}
-              className={`px-3 sm:px-4 py-2 rounded-md font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
+              className={`px-3 sm:px-4 py-2 rounded-lg font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
                 activeTab === "punia"
-                  ? "bg-emerald-700 text-white shadow-sm"
+                  ? "bg-emerald-700 text-white shadow-xs"
                   : "text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200"
               }`}
             >
@@ -307,9 +309,9 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
 
         {/* TAB CONTENT: SECTIONS TRANSACTIONS (KAS UMUM & SEKSI-SEKSI) */}
         {activeTab !== "punia" && (
-          <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden space-y-0">
+          <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden space-y-0">
             {/* Table / Section Toolbar */}
-            <div className="p-4 sm:p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
+            <div className="p-4 sm:p-5 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 bg-slate-50/50">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="px-2 py-0.5 rounded bg-slate-200 text-slate-800 font-mono text-[11px] font-bold">
@@ -325,24 +327,24 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
               </div>
 
               {/* Filters & Search */}
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
                 {/* Search */}
-                <div className="relative">
+                <div className="relative w-full sm:w-56">
                   <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="text"
                     placeholder="Cari transaksi / no ref..."
                     value={txSearch}
                     onChange={(e) => setTxSearch(e.target.value)}
-                    className="pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 w-48 sm:w-56"
+                    className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600"
                   />
                 </div>
 
                 {/* Type Filter Buttons */}
-                <div className="inline-flex rounded border border-slate-200 bg-white p-0.5 text-xs">
+                <div className="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 text-xs w-full sm:w-auto justify-between sm:justify-start">
                   <button
                     onClick={() => setTxTypeFilter("all")}
-                    className={`px-2.5 py-1 rounded transition-colors ${
+                    className={`flex-1 sm:flex-initial px-2.5 py-1 rounded transition-colors text-center ${
                       txTypeFilter === "all"
                         ? "bg-slate-900 text-white font-bold"
                         : "text-slate-600 hover:text-slate-900"
@@ -352,7 +354,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                   </button>
                   <button
                     onClick={() => setTxTypeFilter("income")}
-                    className={`px-2.5 py-1 rounded transition-colors ${
+                    className={`flex-1 sm:flex-initial px-2.5 py-1 rounded transition-colors text-center ${
                       txTypeFilter === "income"
                         ? "bg-emerald-700 text-white font-bold"
                         : "text-slate-600 hover:text-slate-900"
@@ -362,7 +364,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                   </button>
                   <button
                     onClick={() => setTxTypeFilter("expense")}
-                    className={`px-2.5 py-1 rounded transition-colors ${
+                    className={`flex-1 sm:flex-initial px-2.5 py-1 rounded transition-colors text-center ${
                       txTypeFilter === "expense"
                         ? "bg-red-700 text-white font-bold"
                         : "text-slate-600 hover:text-slate-900"
@@ -542,7 +544,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
 
         {/* TAB CONTENT: DANA PUNIA KRAMA (SEARCH & DONATIONS TABLE) */}
         {activeTab === "punia" && (
-          <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden space-y-0">
+          <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden space-y-0">
             {/* Header & Search Bar */}
             <div className="p-4 sm:p-6 border-b border-slate-200 bg-gradient-to-r from-emerald-50/50 via-white to-blue-50/50 space-y-4">
               <div>
@@ -558,7 +560,7 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
               </div>
 
               {/* Search & Filter Bar */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
                 <div className="relative flex-1">
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
@@ -566,14 +568,14 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                     placeholder="Ketik nama donatur / keluarga / banjar untuk verifikasi..."
                     value={puniaSearch}
                     onChange={(e) => setPuniaSearch(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600 font-medium shadow-xs"
+                    className="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-600 font-medium shadow-2xs"
                   />
                 </div>
 
-                <div className="inline-flex rounded border border-slate-300 bg-white p-0.5 text-xs shrink-0">
+                <div className="inline-flex rounded-lg border border-slate-300 bg-white p-0.5 text-xs w-full sm:w-auto justify-between sm:justify-start">
                   <button
                     onClick={() => setPuniaTypeFilter("all")}
-                    className={`px-3 py-1.5 rounded transition-colors ${
+                    className={`flex-1 sm:flex-initial px-2.5 sm:px-3 py-1.5 rounded transition-colors text-center ${
                       puniaTypeFilter === "all"
                         ? "bg-slate-900 text-white font-bold"
                         : "text-slate-600 hover:text-slate-900"
@@ -583,23 +585,23 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
                   </button>
                   <button
                     onClick={() => setPuniaTypeFilter("money")}
-                    className={`px-3 py-1.5 rounded transition-colors ${
+                    className={`flex-1 sm:flex-initial px-2.5 sm:px-3 py-1.5 rounded transition-colors text-center ${
                       puniaTypeFilter === "money"
                         ? "bg-emerald-700 text-white font-bold"
                         : "text-slate-600 hover:text-slate-900"
                     }`}
                   >
-                    Dana Tunai (Uang)
+                    Dana Tunai
                   </button>
                   <button
                     onClick={() => setPuniaTypeFilter("goods")}
-                    className={`px-3 py-1.5 rounded transition-colors ${
+                    className={`flex-1 sm:flex-initial px-2.5 sm:px-3 py-1.5 rounded transition-colors text-center ${
                       puniaTypeFilter === "goods"
                         ? "bg-blue-700 text-white font-bold"
                         : "text-slate-600 hover:text-slate-900"
                     }`}
                   >
-                    Wewantenan (Barang)
+                    Wewantenan
                   </button>
                 </div>
               </div>
