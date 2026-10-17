@@ -227,6 +227,10 @@ export class ApiClient {
     type?: string;
     search?: string;
   }): Promise<{ items: Transaction[]; total: number }> {
+    const cacheKey = `tx_${params?.section_id ?? "all"}_${params?.type ?? "all"}_${params?.search ?? ""}`;
+    const cached = this.getCached<{ items: Transaction[]; total: number }>(cacheKey);
+    if (cached) return cached;
+
     try {
       const query = new URLSearchParams();
       if (params?.section_id) query.set("section_id", String(params.section_id));
@@ -236,7 +240,9 @@ export class ApiClient {
       const res = await this.fetchWithAuth(`${API_BASE_URL}/transactions?${query.toString()}`);
       if (res.ok) {
         const data = await res.json();
-        return { items: data.items, total: data.total };
+        const result = { items: data.items, total: data.total };
+        this.setCached(cacheKey, result, 10000); // 10s cache
+        return result;
       }
     } catch {
       // fallback
@@ -417,7 +423,7 @@ export class ApiClient {
       const res = await fetch(`${API_BASE_URL}/public/kpi`);
       if (res.ok) {
         const data = await res.json();
-        this.setCached("kpi_summary", data, 5000); // 5s cache
+        this.setCached("kpi_summary", data, 15000); // 15s cache
         return data;
       }
     } catch {
@@ -487,7 +493,7 @@ export class ApiClient {
       const res = await fetch(`${API_BASE_URL}/public/expense-distribution`);
       if (res.ok) {
         const data = await res.json();
-        this.setCached("expense_dist", data, 10000); // 10s cache
+        this.setCached("expense_dist", data, 15000); // 15s cache
         return data;
       }
     } catch {
@@ -497,17 +503,20 @@ export class ApiClient {
   }
 
   static async getPuniaDonations(search?: string): Promise<PuniaDonation[]> {
+    const cacheKey = `punia_${search ?? "all"}`;
+    const cached = this.getCached<PuniaDonation[]>(cacheKey);
+    if (cached) return cached;
+
     try {
       const q = search ? `?nama=${encodeURIComponent(search)}&limit=100` : "?limit=100";
-      const res = await fetch(`${API_BASE_URL}/punia/search${q}`, {
-        cache: "no-store",
-      });
+      const res = await fetch(`${API_BASE_URL}/punia/search${q}`);
       if (res.ok) {
         const data = await res.json();
         if (data.items) {
           if (!search) {
             this.puniaList = data.items;
           }
+          this.setCached(cacheKey, data.items, 15000); // 15s cache
           return data.items;
         }
       }

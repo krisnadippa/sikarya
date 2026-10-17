@@ -86,7 +86,8 @@ export default function LoginPage() {
           alt="Latar Belakang Karya Pura Dalem Desa Adat Metra"
           fill
           priority
-          quality={100}
+          sizes="(min-width: 1024px) 70vw, 100vw"
+          quality={80}
           className="object-cover object-left"
         />
       </div>
@@ -99,7 +100,8 @@ export default function LoginPage() {
             alt="Ilustrasi Karya Pura Dalem Desa Adat Metra"
             fill
             priority
-            quality={100}
+            sizes="(max-width: 768px) 360px, 420px"
+            quality={80}
             className="object-contain object-left-bottom"
           />
         </div>
@@ -155,6 +157,8 @@ export default function LoginPage() {
               alt="Ilustrasi Upacara Adat Bali"
               width={400}
               height={340}
+              sizes="(max-width: 640px) 240px, 320px"
+              quality={85}
               className="h-32 sm:h-40 md:h-48 w-auto object-contain"
               priority
             />
