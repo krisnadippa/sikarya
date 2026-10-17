@@ -105,8 +105,8 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* MOBILE TOP HEADER: Khusus tampilan mobile diturunkan dengan pas dan terkunci shrink-0 */}
-      <header className="lg:hidden w-full px-5 pt-24 sm:pt-10 pb-1 bg-transparent flex items-center justify-center gap-2.5 z-20 shrink-0">
+      {/* TOP HEADER: Logo SiKarya dinaikkan ke paling atas sebagai header */}
+      <header className="lg:hidden w-full px-5 pt-4 pb-2 sm:pt-6 bg-transparent flex items-center justify-center gap-2.5 z-20 shrink-0">
         <Image
           src="/logo_hitam.png"
           alt="Logo SIKARYA"
@@ -148,20 +148,20 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Asset Gambar tes12 - Diperbesar agar lebih jelas dan proporsional di mobile */}
-          <div className="flex justify-center items-center -mt-50 mb-3 lg:my-5">
+          {/* Asset Gambar tes12 - Proporsional dan rapi di bawah header tanpa saling bertabrakan */}
+          <div className="flex justify-center items-center my-2 sm:my-3 lg:my-5">
             <Image
               src="/tes12.png"
               alt="Ilustrasi Upacara Adat Bali"
               width={400}
               height={340}
-              className="h-44 sm:h-48 md:h-52 w-auto object-contain"
+              className="h-32 sm:h-40 md:h-48 w-auto object-contain"
               priority
             />
           </div>
 
           {/* Form Title & Subtitle - Rapi di tengah di bawah asset seperti pada gambar */}
-          <div className="text-center mb-5 sm:mb-6">
+          <div className="text-center mb-4 sm:mb-6">
             <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
               Masuk ke Sistem
             </h1>
