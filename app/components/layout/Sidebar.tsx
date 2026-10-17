@@ -114,7 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const publicItems = [
     {
       label: "Portal Publik Krama",
-      href: "/public",
+      href: "/",
       icon: Smartphone,
       external: true,
     },

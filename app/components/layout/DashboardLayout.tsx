@@ -119,7 +119,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             {/* Quick Access to Public Views */}
             <div className="hidden lg:flex items-center gap-2 border-r border-gray-200 pr-3">
               <a
-                href="/public"
+                href="/"
                 target="_blank"
                 className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
                 title="Buka Portal Publik Krama"

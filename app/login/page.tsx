@@ -279,7 +279,7 @@ export default function LoginPage() {
 
             <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
               <Link
-                href="/public"
+                href="/"
                 className="flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 px-3 rounded-2xl border border-gray-200 hover:border-blue-400 bg-gray-50/70 hover:bg-blue-50/60 text-gray-700 hover:text-blue-700 font-bold text-xs sm:text-sm transition-all shadow-2xs group cursor-pointer"
                 title="Buka Portal Transparansi Krama"
               >
