@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/app/lib/db';
+import { getAuthUser } from '@/app/lib/auth-server';
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json({ detail: 'Autentikasi diperlukan.' }, { status: 401 });
+    }
+
     const { id } = await params;
     const txId = parseInt(id, 10);
     const body = await request.json();
@@ -15,6 +21,11 @@ export async function PUT(
       return NextResponse.json({ detail: 'Transaksi tidak ditemukan.' }, { status: 404 });
     }
     const current = existingRows[0];
+
+    // RBAC: bendahara_seksi can only update their own section transactions
+    if (authUser.role === 'bendahara_seksi' && authUser.section_id && current.section_id !== authUser.section_id) {
+      return NextResponse.json({ detail: 'Akses ditolak: Tidak berhak mengubah transaksi seksi lain.' }, { status: 403 });
+    }
 
     const description = body.description ?? current.description;
     const amount = body.amount !== undefined ? Number(body.amount) : Number(current.amount);
@@ -41,16 +52,26 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json({ detail: 'Autentikasi diperlukan.' }, { status: 401 });
+    }
+
     const { id } = await params;
     const txId = parseInt(id, 10);
 
-    const existing = await sql`SELECT id, linked_transaction_id FROM transactions WHERE id = ${txId} LIMIT 1`;
+    const existing = await sql`SELECT id, section_id, linked_transaction_id FROM transactions WHERE id = ${txId} LIMIT 1`;
     if (existing.length === 0) {
       return NextResponse.json({ detail: 'Transaksi tidak ditemukan.' }, { status: 404 });
+    }
+
+    const current = existing[0];
+    if (authUser.role === 'bendahara_seksi' && authUser.section_id && current.section_id !== authUser.section_id) {
+      return NextResponse.json({ detail: 'Akses ditolak: Tidak berhak menghapus transaksi seksi lain.' }, { status: 403 });
     }
 
     // If there is linked transaction, unlink or delete

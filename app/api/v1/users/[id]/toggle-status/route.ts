@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/app/lib/db';
+import { getAuthUser } from '@/app/lib/auth-server';
 
 export async function PATCH(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser || (authUser.role !== 'super_admin' && authUser.role !== 'panitia_punia')) {
+      return NextResponse.json({ detail: 'Akses ditolak: Hanya panitia yang berwenang mengubah status akun.' }, { status: 403 });
+    }
+
     const { id } = await params;
     const userId = parseInt(id, 10);
 

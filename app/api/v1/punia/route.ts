@@ -117,17 +117,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const authUser = await getAuthUser(request);
-    let userId = authUser?.id;
-
-    if (!userId) {
-      // Fallback to petugas_punia or panitia_punia
-      const defaultStaff = await sql`
-        SELECT id, username, full_name, role FROM users 
-        WHERE role IN ('petugas_punia', 'panitia_punia') 
-        ORDER BY id ASC LIMIT 1
-      `;
-      userId = defaultStaff[0]?.id || 6;
+    if (!authUser) {
+      return NextResponse.json({ detail: 'Autentikasi petugas diperlukan untuk mencatat dana punia.' }, { status: 401 });
     }
+    const userId = authUser.id;
 
     const body = await request.json();
     const { donor_name, donation_type, date, amount_money, goods_name, goods_quantity, notes } = body;

@@ -35,6 +35,7 @@ import { TransactionTable } from "@/app/components/admin/TransactionTable";
 import { TransactionModal } from "@/app/components/admin/TransactionModal";
 import { ReceiptModal } from "@/app/components/admin/ReceiptModal";
 import { ReportModal } from "@/app/components/admin/ReportModal";
+import { SuccessModal, SuccessDetailItem } from "@/app/components/common/SuccessModal";
 
 export default function DashboardUmumPage() {
   const router = useRouter();
@@ -51,6 +52,21 @@ export default function DashboardUmumPage() {
   const [isAllocationMode, setIsAllocationMode] = useState(false);
   const [selectedReceiptTx, setSelectedReceiptTx] = useState<Transaction | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+
+  // Success Feedback Modal state
+  const [successInfo, setSuccessInfo] = useState<{
+    isOpen: boolean;
+    title: string;
+    subtitle: string;
+    details: SuccessDetailItem[];
+    transaction?: Transaction | null;
+  }>({
+    isOpen: false,
+    title: "",
+    subtitle: "",
+    details: [],
+    transaction: null,
+  });
 
   // Filter state
   const [selectedSectionFilter, setSelectedSectionFilter] = useState<number | null>(null);
@@ -82,14 +98,60 @@ export default function DashboardUmumPage() {
     refreshData();
   }, [selectedSectionFilter]);
 
+  const formatRp = (num: number) =>
+    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(num);
+
   const handleSaveTransaction = async (data: TransactionInput) => {
-    await ApiClient.createTransaction(data);
+    const createdTx = await ApiClient.createTransaction(data);
     await refreshData();
+
+    const isExpense = data.type === "expense";
+    const secName = sections.find((s) => s.id === data.section_id)?.section_name || "Kas Umum";
+    const isAutoSync = Boolean(data.target_section_id && isExpense);
+    const targetSec = isAutoSync ? sections.find((s) => s.id === data.target_section_id) : null;
+
+    setSuccessInfo({
+      isOpen: true,
+      title: isAutoSync
+        ? "Penyaluran Dana & Auto-Ledger Berhasil!"
+        : isExpense
+        ? "Pengeluaran Kas Berhasil Dicatat!"
+        : "Pemasukan Kas Berhasil Dicatat!",
+      subtitle: isAutoSync
+        ? `Dana sukses disalurkan ke ${targetSec?.section_name || "Seksi"} dan otomatis tercatat pada buku kas kedua pihak.`
+        : "Transaksi berhasil dibukukan secara sah dan saldo kas umum telah diperbarui.",
+      details: [
+        { label: "Nominal", value: formatRp(data.amount), isHighlight: true },
+        { label: "No. Referensi", value: createdTx?.ref_no || "Otomatis Sistem" },
+        { label: "Tanggal", value: data.date },
+        { label: "Buku Kas", value: secName },
+        {
+          label: "Bukti Fisik / Nota",
+          value: data.receipt_file_url?.startsWith("data:")
+            ? "Foto Kamera Terlampir"
+            : data.receipt_file_url
+            ? "Arsip Terstandarisasi"
+            : "Tanpa Lampiran",
+        },
+      ],
+      transaction: createdTx,
+    });
   };
 
   const handleDeleteTransaction = async (tx: Transaction) => {
     await ApiClient.deleteTransaction(tx.id);
     await refreshData();
+    setSuccessInfo({
+      isOpen: true,
+      title: "Transaksi Dihapus",
+      subtitle: `Transaksi referensi ${tx.ref_no} telah dihapus dari pembukuan dan saldo telah disesuaikan.`,
+      details: [
+        { label: "No. Referensi", value: tx.ref_no },
+        { label: "Uraian", value: tx.description },
+        { label: "Nominal", value: formatRp(tx.amount) },
+      ],
+      transaction: null,
+    });
   };
 
   const kasUmumSection = sections.find((s) => s.section_code === "KAS-01") || sections[0];
@@ -294,6 +356,20 @@ export default function DashboardUmumPage() {
           currentUser={currentUser || ApiClient.getCurrentUser()}
         />
       )}
+
+      {/* Success Feedback Modal */}
+      <SuccessModal
+        isOpen={successInfo.isOpen}
+        onClose={() => setSuccessInfo((prev) => ({ ...prev, isOpen: false }))}
+        title={successInfo.title}
+        subtitle={successInfo.subtitle}
+        details={successInfo.details}
+        onViewReceipt={
+          successInfo.transaction?.receipt_file_url
+            ? () => setSelectedReceiptTx(successInfo.transaction!)
+            : undefined
+        }
+      />
     </DashboardLayout>
   );
 }

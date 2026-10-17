@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/app/lib/db';
-import { hashPassword } from '@/app/lib/auth-server';
+import { hashPassword, getAuthUser } from '@/app/lib/auth-server';
 
 export async function GET(request: NextRequest) {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser) {
+      return NextResponse.json({ detail: 'Autentikasi diperlukan.' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const role = searchParams.get('role');
 
@@ -32,6 +37,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const authUser = await getAuthUser(request);
+    if (!authUser || (authUser.role !== 'super_admin' && authUser.role !== 'panitia_punia')) {
+      return NextResponse.json({ detail: 'Akses ditolak: Hanya panitia yang berwenang membuat akun.' }, { status: 403 });
+    }
+
     const body = await request.json();
     const { username, password, role, full_name, section_id } = body;
 

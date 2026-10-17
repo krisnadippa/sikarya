@@ -4,6 +4,10 @@ import React, { useState } from "react";
 import {
   X,
   Upload,
+  Camera,
+  Trash2,
+  RefreshCw,
+  Image as ImageIcon,
   Link as LinkIcon,
   CheckCircle2,
   AlertCircle,
@@ -70,8 +74,82 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const [enableAutoSync, setEnableAutoSync] = useState<boolean>(isAllocation);
   const [targetSectionId, setTargetSectionId] = useState<number>(2); // Default: Seksi Yadnya
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [compressedDataUrl, setCompressedDataUrl] = useState<string | null>(null);
+  const [isCompressing, setIsCompressing] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const cameraInputRef = React.useRef<HTMLInputElement | null>(null);
+  const galleryInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const processImageFile = async (file: File) => {
+    setSelectedFile(file);
+    if (!file.type.startsWith("image/")) {
+      setImagePreviewUrl(null);
+      setCompressedDataUrl(null);
+      return;
+    }
+
+    setIsCompressing(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const rawDataUrl = e.target?.result as string;
+        const img = new window.Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 1280;
+          const MAX_HEIGHT = 1280;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height = Math.round((height * MAX_WIDTH) / width);
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width = Math.round((width * MAX_HEIGHT) / height);
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressed = canvas.toDataURL("image/jpeg", 0.75);
+            setImagePreviewUrl(compressed);
+            setCompressedDataUrl(compressed);
+          } else {
+            setImagePreviewUrl(rawDataUrl);
+            setCompressedDataUrl(rawDataUrl);
+          }
+          setIsCompressing(false);
+        };
+        img.onerror = () => {
+          setImagePreviewUrl(rawDataUrl);
+          setCompressedDataUrl(rawDataUrl);
+          setIsCompressing(false);
+        };
+        img.src = rawDataUrl;
+      };
+      reader.readAsDataURL(file);
+    } catch {
+      setIsCompressing(false);
+    }
+  };
+
+  const handleClearPhoto = () => {
+    setSelectedFile(null);
+    setImagePreviewUrl(null);
+    setCompressedDataUrl(null);
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
+    if (galleryInputRef.current) galleryInputRef.current.value = "";
+  };
 
   if (!isOpen) return null;
 
@@ -92,7 +170,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   // Format: kode_bendahara_id_transaksi_no_transaksi_tgl_bln_th.ext
   const userRolePrefix = currentUser.role === "bendahara_umum" ? "BU" : selectedSection.section_code.replace("-", "");
   const dateFormatted = date.split("-").reverse().join("_");
-  const ext = selectedFile ? selectedFile.name.split(".").pop() : "png";
+  const ext = selectedFile ? selectedFile.name.split(".").pop() : "jpg";
   const autoReceiptNamePreview = `${userRolePrefix}_TX_${refPrefix}01_${dateFormatted}.${ext}`;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -117,6 +195,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           ? currentUser.section_id
           : (defaultSectionId && !isAllocation ? defaultSectionId : sectionId);
 
+      // Prefer compressed base64 photo if taken, or fallback to standardized receipt path
+      const finalReceiptUrl = compressedDataUrl || (selectedFile ? `/uploads/receipts/${autoReceiptNamePreview}` : `/uploads/receipts/${autoReceiptNamePreview}`);
+
       await onSave({
         section_id: finalSectionId,
         date,
@@ -124,7 +205,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         amount: numAmount,
         description: description.trim(),
         target_section_id: canPerformAutoSync && enableAutoSync ? targetSectionId : null,
-        receipt_file_url: `/uploads/receipts/${autoReceiptNamePreview}`,
+        receipt_file_url: finalReceiptUrl,
       });
       onClose();
     } catch (err: any) {
@@ -333,26 +414,116 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
             </div>
           )}
 
-          {/* Upload Bukti Kwitansi (Auto-Receipt Naming Standard) */}
-          <div className="border border-gray-200 rounded p-3 bg-gray-50 space-y-2">
+          {/* Upload / Foto Bukti Kwitansi (Direct Camera + Gallery) */}
+          <div className="border border-gray-200 rounded p-3 bg-gray-50 space-y-2.5">
             <div className="flex items-center justify-between">
-              <label className="font-bold text-gray-700 flex items-center gap-1.5">
-                <Upload className="w-4 h-4 text-gray-500" />
-                <span>Upload Bukti E-File (Kwitansi / Nota)</span>
+              <label className="font-bold text-gray-700 flex items-center gap-1.5 text-xs">
+                <Camera className="w-4 h-4 text-blue-600" />
+                <span>Bukti Fisik E-File (Foto Nota / Kwitansi)</span>
               </label>
-              <span className="text-[10px] font-mono text-gray-500">Max 10MB</span>
+              <span className="text-[10px] font-mono text-gray-500">Kamera HP / Berkas</span>
             </div>
 
+            {/* Hidden file inputs */}
             <input
+              ref={cameraInputRef}
               type="file"
-              accept="image/png,image/jpeg,image/jpg,application/pdf"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
               onChange={(e) => {
                 if (e.target.files && e.target.files[0]) {
-                  setSelectedFile(e.target.files[0]);
+                  processImageFile(e.target.files[0]);
                 }
               }}
-              className="w-full text-xs text-gray-600 file:mr-3 file:py-1 file:px-2.5 file:rounded file:border file:border-gray-200 file:text-xs file:font-semibold file:bg-white file:text-gray-700 hover:file:bg-gray-100 cursor-pointer"
             />
+            <input
+              ref={galleryInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/jpg,image/webp,application/pdf"
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  processImageFile(e.target.files[0]);
+                }
+              }}
+            />
+
+            {/* If no image selected yet */}
+            {!imagePreviewUrl && !selectedFile ? (
+              <div className="grid grid-cols-2 gap-2 pt-0.5">
+                <button
+                  type="button"
+                  onClick={() => cameraInputRef.current?.click()}
+                  className="flex items-center justify-center gap-2 py-2 px-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                >
+                  <Camera className="w-4 h-4 shrink-0" />
+                  <span className="truncate">Foto Kamera Langsung</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => galleryInputRef.current?.click()}
+                  className="flex items-center justify-center gap-2 py-2 px-3 bg-white border border-gray-300 hover:bg-gray-100 active:bg-gray-200 text-gray-700 rounded text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  <Upload className="w-4 h-4 text-gray-500 shrink-0" />
+                  <span className="truncate">Pilih dari Galeri</span>
+                </button>
+              </div>
+            ) : (
+              /* Image preview and actions */
+              <div className="bg-white border border-gray-200 rounded p-2.5 space-y-2">
+                <div className="flex items-center gap-3">
+                  {imagePreviewUrl ? (
+                    <div className="relative w-16 h-16 rounded border border-gray-200 overflow-hidden bg-gray-100 shrink-0">
+                      <img
+                        src={imagePreviewUrl}
+                        alt="Preview Nota"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-16 h-16 rounded border border-gray-200 bg-gray-50 flex items-center justify-center text-gray-400 shrink-0">
+                      <FileText className="w-6 h-6" />
+                    </div>
+                  )}
+
+                  <div className="flex-1 min-w-0 text-xs">
+                    <div className="flex items-center gap-1.5 text-emerald-600 font-bold">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate">
+                        {isCompressing ? "Mengompresi foto..." : "Foto Nota Terlampir"}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-gray-700 font-medium truncate mt-0.5">
+                      {selectedFile?.name || "Foto Kamera"}
+                    </p>
+                    <p className="text-[10px] text-gray-400 font-mono">
+                      {selectedFile ? `${(selectedFile.size / 1024).toFixed(0)} KB` : ""}
+                      {compressedDataUrl ? " • Teroptimasi SiKarya" : ""}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-1 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => cameraInputRef.current?.click()}
+                      title="Foto Ulang Kamera"
+                      className="p-1.5 text-blue-600 hover:bg-blue-50 border border-blue-200 rounded flex items-center justify-center cursor-pointer transition-colors"
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleClearPhoto}
+                      title="Hapus Foto"
+                      className="p-1.5 text-red-600 hover:bg-red-50 border border-red-200 rounded flex items-center justify-center cursor-pointer transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Auto-Naming Preview Notice according to PRD */}
             <div className="bg-white border border-gray-200 p-2 rounded text-[11px] text-gray-600">

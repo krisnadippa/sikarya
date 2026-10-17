@@ -1,5 +1,15 @@
 import { neon } from '@neondatabase/serverless';
 
-const databaseUrl = process.env.DATABASE_URL || "postgresql://neondb_owner:npg_wBUnATKx3b6m@ep-odd-heart-b4vncp4k-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require";
+const databaseUrl = process.env.DATABASE_URL;
 
-export const sql = neon(databaseUrl);
+if (!databaseUrl) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('DATABASE_URL environment variable is not defined!');
+  } else {
+    console.warn('WARNING: DATABASE_URL is not set. Ensure .env.local contains DATABASE_URL.');
+  }
+}
+
+export const sql = neon(databaseUrl || '');
+
+

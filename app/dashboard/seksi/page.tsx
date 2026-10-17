@@ -29,6 +29,7 @@ import { TransactionTable } from "@/app/components/admin/TransactionTable";
 import { TransactionModal } from "@/app/components/admin/TransactionModal";
 import { ReceiptModal } from "@/app/components/admin/ReceiptModal";
 import { ReportModal } from "@/app/components/admin/ReportModal";
+import { SuccessModal, SuccessDetailItem } from "@/app/components/common/SuccessModal";
 
 export default function DashboardSeksiPage() {
   const router = useRouter();
@@ -45,6 +46,21 @@ export default function DashboardSeksiPage() {
   const [isTxModalOpen, setIsTxModalOpen] = useState(false);
   const [selectedReceiptTx, setSelectedReceiptTx] = useState<Transaction | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+
+  // Success Feedback Modal state
+  const [successInfo, setSuccessInfo] = useState<{
+    isOpen: boolean;
+    title: string;
+    subtitle: string;
+    details: SuccessDetailItem[];
+    transaction?: Transaction | null;
+  }>({
+    isOpen: false,
+    title: "",
+    subtitle: "",
+    details: [],
+    transaction: null,
+  });
 
   useEffect(() => {
     const user = ApiClient.getCurrentUser();
@@ -78,6 +94,9 @@ export default function DashboardSeksiPage() {
     refreshData();
   }, [assignedSection]);
 
+  const formatRp = (num: number) =>
+    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(num);
+
   const handleSaveTransaction = async (data: TransactionInput) => {
     const finalSecId =
       currentUser?.role === "bendahara_seksi" && currentUser.section_id
@@ -86,8 +105,29 @@ export default function DashboardSeksiPage() {
 
     data.section_id = finalSecId;
     data.type = "expense";
-    await ApiClient.createTransaction(data);
+    const createdTx = await ApiClient.createTransaction(data);
     await refreshData(finalSecId);
+
+    setSuccessInfo({
+      isOpen: true,
+      title: "Nota Belanja Seksi Berhasil Dicatat!",
+      subtitle: `Pengeluaran ${assignedSection.section_name} telah sah dibukukan dengan lampiran bukti e-file.`,
+      details: [
+        { label: "Nominal Belanja", value: formatRp(data.amount), isHighlight: true },
+        { label: "No. Referensi Nota", value: createdTx?.ref_no || "Otomatis Sistem" },
+        { label: "Tanggal", value: data.date },
+        { label: "Seksi", value: assignedSection.section_name },
+        {
+          label: "Bukti Foto Nota",
+          value: data.receipt_file_url?.startsWith("data:")
+            ? "Foto Kamera Terlampir"
+            : data.receipt_file_url
+            ? "Arsip Terstandarisasi"
+            : "Tanpa Lampiran",
+        },
+      ],
+      transaction: createdTx,
+    });
   };
 
   const handleDeleteExpense = async (tx: Transaction) => {
@@ -95,6 +135,17 @@ export default function DashboardSeksiPage() {
     if (tx.type === "expense") {
       await ApiClient.deleteTransaction(tx.id);
       await refreshData();
+      setSuccessInfo({
+        isOpen: true,
+        title: "Nota Belanja Dihapus",
+        subtitle: `Nota belanja ${tx.ref_no} telah dihapus dari pembukuan seksi.`,
+        details: [
+          { label: "No. Referensi", value: tx.ref_no },
+          { label: "Uraian Belanja", value: tx.description },
+          { label: "Nominal", value: formatRp(tx.amount) },
+        ],
+        transaction: null,
+      });
     }
   };
 
@@ -328,6 +379,20 @@ export default function DashboardSeksiPage() {
           lockedSectionId={assignedSection.id}
         />
       )}
+
+      {/* Success Feedback Modal */}
+      <SuccessModal
+        isOpen={successInfo.isOpen}
+        onClose={() => setSuccessInfo((prev) => ({ ...prev, isOpen: false }))}
+        title={successInfo.title}
+        subtitle={successInfo.subtitle}
+        details={successInfo.details}
+        onViewReceipt={
+          successInfo.transaction?.receipt_file_url
+            ? () => setSelectedReceiptTx(successInfo.transaction!)
+            : undefined
+        }
+      />
     </DashboardLayout>
   );
 }

@@ -22,6 +22,7 @@ import { DashboardLayout } from "@/app/components/layout/DashboardLayout";
 import { PuniaTable } from "@/app/components/admin/PuniaTable";
 import { PuniaModal } from "@/app/components/admin/PuniaModal";
 import { PuniaReportModal } from "@/app/components/admin/PuniaReportModal";
+import { SuccessModal, SuccessDetailItem } from "@/app/components/common/SuccessModal";
 
 export default function DashboardPanitiaPage() {
   const router = useRouter();
@@ -32,6 +33,19 @@ export default function DashboardPanitiaPage() {
   const [puniaList, setPuniaList] = useState<PuniaDonation[]>(initialPuniaDonations);
   const [isPuniaModalOpen, setIsPuniaModalOpen] = useState(false);
   const [isPuniaReportModalOpen, setIsPuniaReportModalOpen] = useState(false);
+
+  // Success Feedback Modal state
+  const [successInfo, setSuccessInfo] = useState<{
+    isOpen: boolean;
+    title: string;
+    subtitle: string;
+    details: SuccessDetailItem[];
+  }>({
+    isOpen: false,
+    title: "",
+    subtitle: "",
+    details: [],
+  });
 
   // User management state
   const [petugasUsers, setPetugasUsers] = useState<User[]>(
@@ -86,6 +100,17 @@ export default function DashboardPanitiaPage() {
         type: "success",
         text: `Akun Petugas '${created.username}' (${created.full_name}) berhasil disimpan ke database dan langsung aktif! Petugas dapat login di halaman login.`,
       });
+      setSuccessInfo({
+        isOpen: true,
+        title: "Akun Petugas Berhasil Dibuat!",
+        subtitle: `Petugas baru telah tersimpan di database dan akun langsung aktif siap bertugas.`,
+        details: [
+          { label: "Username", value: created.username, isHighlight: true },
+          { label: "Nama Lengkap", value: created.full_name || created.username },
+          { label: "Role / Peran", value: "Petugas Kasir Punia" },
+          { label: "Status", value: "Aktif Langsung" },
+        ],
+      });
       setNewUsername("");
       setNewFullName("");
       setNewPassword("");
@@ -106,6 +131,27 @@ export default function DashboardPanitiaPage() {
     const saved = await ApiClient.createPunia(data);
     if (saved) {
       setPuniaList((prev) => [saved, ...prev.filter((p) => p.id !== saved.id)]);
+      const formatRp = (num: number) =>
+        new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(num);
+
+      setSuccessInfo({
+        isOpen: true,
+        title: "Dana Punia Berhasil Dicatat!",
+        subtitle: `Penerimaan dana punia dari ${saved.donor_name || "Krama"} telah sah tersimpan ke database.`,
+        details: [
+          { label: "Nama Donatur", value: saved.donor_name || "Hamba Tuhan" },
+          {
+            label: "Jenis & Nilai",
+            value:
+              saved.donation_type === "money"
+                ? formatRp(Number(saved.amount_money || 0))
+                : `${saved.goods_name || "-"} (${saved.goods_quantity || "-"})`,
+            isHighlight: true,
+          },
+          { label: "Tanggal", value: saved.date || "-" },
+          { label: "No. Bukti Kuitansi", value: `PN-${String(saved.id).padStart(3, "0")}` },
+        ],
+      });
     }
     await refreshData();
   };
@@ -428,6 +474,15 @@ export default function DashboardPanitiaPage() {
           currentUser={currentUser || ApiClient.getCurrentUser()}
         />
       )}
+
+      {/* Success Feedback Modal */}
+      <SuccessModal
+        isOpen={successInfo.isOpen}
+        onClose={() => setSuccessInfo((prev) => ({ ...prev, isOpen: false }))}
+        title={successInfo.title}
+        subtitle={successInfo.subtitle}
+        details={successInfo.details}
+      />
     </DashboardLayout>
   );
 }

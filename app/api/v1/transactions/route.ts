@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
     if (sectionId && type && pattern) {
       rows = await sql`
         SELECT t.id, t.section_id, t.user_id, t.date::text, t.description, t.ref_no, t.type,
-               t.amount::numeric, t.balance::numeric, t.linked_transaction_id, t.receipt_file_url,
+               t.amount::numeric, t.balance::numeric, t.linked_transaction_id,
+               CASE WHEN t.receipt_file_url LIKE 'data:image/%' THEN ('/api/v1/transactions/' || t.id || '/receipt') ELSE t.receipt_file_url END as receipt_file_url,
                t.created_at, t.updated_at,
                s.section_name, s.section_code,
                u.username, u.full_name, u.role
@@ -40,7 +41,8 @@ export async function GET(request: NextRequest) {
     } else if (sectionId && type) {
       rows = await sql`
         SELECT t.id, t.section_id, t.user_id, t.date::text, t.description, t.ref_no, t.type,
-               t.amount::numeric, t.balance::numeric, t.linked_transaction_id, t.receipt_file_url,
+               t.amount::numeric, t.balance::numeric, t.linked_transaction_id,
+               CASE WHEN t.receipt_file_url LIKE 'data:image/%' THEN ('/api/v1/transactions/' || t.id || '/receipt') ELSE t.receipt_file_url END as receipt_file_url,
                t.created_at, t.updated_at,
                s.section_name, s.section_code,
                u.username, u.full_name, u.role
@@ -57,7 +59,8 @@ export async function GET(request: NextRequest) {
     } else if (sectionId && pattern) {
       rows = await sql`
         SELECT t.id, t.section_id, t.user_id, t.date::text, t.description, t.ref_no, t.type,
-               t.amount::numeric, t.balance::numeric, t.linked_transaction_id, t.receipt_file_url,
+               t.amount::numeric, t.balance::numeric, t.linked_transaction_id,
+               CASE WHEN t.receipt_file_url LIKE 'data:image/%' THEN ('/api/v1/transactions/' || t.id || '/receipt') ELSE t.receipt_file_url END as receipt_file_url,
                t.created_at, t.updated_at,
                s.section_name, s.section_code,
                u.username, u.full_name, u.role
@@ -77,7 +80,8 @@ export async function GET(request: NextRequest) {
     } else if (sectionId) {
       rows = await sql`
         SELECT t.id, t.section_id, t.user_id, t.date::text, t.description, t.ref_no, t.type,
-               t.amount::numeric, t.balance::numeric, t.linked_transaction_id, t.receipt_file_url,
+               t.amount::numeric, t.balance::numeric, t.linked_transaction_id,
+               CASE WHEN t.receipt_file_url LIKE 'data:image/%' THEN ('/api/v1/transactions/' || t.id || '/receipt') ELSE t.receipt_file_url END as receipt_file_url,
                t.created_at, t.updated_at,
                s.section_name, s.section_code,
                u.username, u.full_name, u.role
@@ -94,7 +98,8 @@ export async function GET(request: NextRequest) {
     } else if (type) {
       rows = await sql`
         SELECT t.id, t.section_id, t.user_id, t.date::text, t.description, t.ref_no, t.type,
-               t.amount::numeric, t.balance::numeric, t.linked_transaction_id, t.receipt_file_url,
+               t.amount::numeric, t.balance::numeric, t.linked_transaction_id,
+               CASE WHEN t.receipt_file_url LIKE 'data:image/%' THEN ('/api/v1/transactions/' || t.id || '/receipt') ELSE t.receipt_file_url END as receipt_file_url,
                t.created_at, t.updated_at,
                s.section_name, s.section_code,
                u.username, u.full_name, u.role
@@ -111,7 +116,8 @@ export async function GET(request: NextRequest) {
     } else if (pattern) {
       rows = await sql`
         SELECT t.id, t.section_id, t.user_id, t.date::text, t.description, t.ref_no, t.type,
-               t.amount::numeric, t.balance::numeric, t.linked_transaction_id, t.receipt_file_url,
+               t.amount::numeric, t.balance::numeric, t.linked_transaction_id,
+               CASE WHEN t.receipt_file_url LIKE 'data:image/%' THEN ('/api/v1/transactions/' || t.id || '/receipt') ELSE t.receipt_file_url END as receipt_file_url,
                t.created_at, t.updated_at,
                s.section_name, s.section_code,
                u.username, u.full_name, u.role
@@ -129,7 +135,8 @@ export async function GET(request: NextRequest) {
     } else {
       rows = await sql`
         SELECT t.id, t.section_id, t.user_id, t.date::text, t.description, t.ref_no, t.type,
-               t.amount::numeric, t.balance::numeric, t.linked_transaction_id, t.receipt_file_url,
+               t.amount::numeric, t.balance::numeric, t.linked_transaction_id,
+               CASE WHEN t.receipt_file_url LIKE 'data:image/%' THEN ('/api/v1/transactions/' || t.id || '/receipt') ELSE t.receipt_file_url END as receipt_file_url,
                t.created_at, t.updated_at,
                s.section_name, s.section_code,
                u.username, u.full_name, u.role
@@ -197,17 +204,22 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const authUser = await getAuthUser(request);
-    let userId = authUser?.id;
-
-    if (!userId) {
-      const defaultUser = await sql`
-        SELECT id, username, full_name, role FROM users WHERE role = 'bendahara_umum' LIMIT 1
-      `;
-      userId = defaultUser[0]?.id || 2;
+    if (!authUser) {
+      return NextResponse.json({ detail: 'Autentikasi bendahara diperlukan untuk mencatat transaksi.' }, { status: 401 });
     }
+    const userId = authUser.id;
 
     const body = await request.json();
     const { section_id, date, description, type, amount, target_section_id, receipt_file_url } = body;
+
+    // RBAC: bendahara_seksi can only record for their assigned section
+    if (authUser.role === 'bendahara_seksi' && authUser.section_id && Number(section_id) !== Number(authUser.section_id)) {
+      return NextResponse.json({ detail: 'Akses ditolak: Bendahara seksi hanya berwenang mencatat untuk seksinya sendiri.' }, { status: 403 });
+    }
+
+    if (authUser.role === 'bendahara_seksi' && target_section_id) {
+      return NextResponse.json({ detail: 'Akses ditolak: Bendahara seksi tidak berwenang menyalurkan dana kas umum.' }, { status: 403 });
+    }
 
     if (!section_id || !date || !description || !type || !amount) {
       return NextResponse.json({ detail: 'Data transaksi tidak lengkap.' }, { status: 400 });
@@ -308,7 +320,10 @@ export async function POST(request: NextRequest) {
       amount: Number(primaryTx.amount),
       balance: Number(primaryTx.balance),
       linked_transaction_id: primaryTx.linked_transaction_id,
-      receipt_file_url: primaryTx.receipt_file_url,
+      receipt_file_url:
+        primaryTx.receipt_file_url && primaryTx.receipt_file_url.startsWith('data:image/')
+          ? `/api/v1/transactions/${primaryTx.id}/receipt`
+          : primaryTx.receipt_file_url,
       created_at: primaryTx.created_at,
       updated_at: primaryTx.updated_at,
       section: {
