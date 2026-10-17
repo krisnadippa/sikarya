@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Search,
   Wallet,
@@ -23,6 +24,8 @@ import {
   MapPin,
   TrendingUp,
   Receipt,
+  Lock,
+  Tv,
 } from "lucide-react";
 import { DashboardKPISummary, PuniaDonation, Section, Transaction } from "@/app/types";
 
@@ -147,12 +150,28 @@ export const PublicPortalView: React.FC<PublicPortalViewProps> = ({
             </div>
           </div>
 
-          {/* Right Status Badge (No login/kiosk buttons for public krama) */}
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 shadow-xs">
+          {/* Right Status Badge & Panitia Login Link */}
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200 shadow-xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>Terbuka & Transparan</span>
             </span>
+            <Link
+              href="/kiosk"
+              className="hidden md:inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-amber-700 bg-white hover:bg-amber-50/60 px-3 py-1.5 rounded-full border border-slate-200 hover:border-amber-300 shadow-2xs transition-all"
+              title="Buka Layar TV Kiosk"
+            >
+              <Tv className="w-3.5 h-3.5 text-amber-600" />
+              <span>TV Kiosk</span>
+            </Link>
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 hover:text-blue-700 bg-white hover:bg-blue-50/60 px-3 py-1.5 rounded-full border border-slate-200 hover:border-blue-300 shadow-2xs transition-all"
+              title="Masuk ke Dashboard Kepanitiaan"
+            >
+              <Lock className="w-3.5 h-3.5 text-blue-600" />
+              <span>Login Panitia</span>
+            </Link>
           </div>
         </div>
       </header>
