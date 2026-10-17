@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SIKARYA METRA
 
-## Getting Started
+> **Sistem Informasi Keuangan & Transparansi Dana Punia**  
+> Panitia Karya Pura Dalem Desa Adat Metra
 
-First, run the development server:
+SIKARYA METRA adalah aplikasi web terpadu yang dirancang untuk mendukung tata kelola pembukuan kas otomatis (*Auto-Ledger Sync*), akuntabilitas laporan per seksi, serta transparansi dana punia pada pelaksanaan Karya di Pura Dalem Desa Adat Metra.
 
+---
+
+## Fitur Utama
+
+- **Dashboard Keuangan Terintegrasi**: Pemantauan pemasukan, pengeluaran, dan saldo kas secara real-time untuk Bendahara Umum dan Bendahara Seksi.
+- **Pencatatan & Verifikasi Dana Punia**: Pengelolaan donasi tunai maupun transfer dari krama dan pamedek lengkap dengan pencetakan bukti kuitansi.
+- **Portal Publik Krama**: Halaman transparansi terbuka bagi masyarakat dan krama desa adat untuk memantau ringkasan kas secara akuntabel tanpa perlu login.
+- **Layar TV Kiosk**: Tampilan display informasi dinamis yang dirancang khusus untuk monitor/TV di posko karya pura.
+- **Hak Akses Berbasis Peran (RBAC)**: Pengelolaan wewenang terstruktur untuk Super Admin, Bendahara Umum, Bendahara Seksi, dan Petugas Punia.
+
+---
+
+## Teknologi
+
+- **Frontend**: Next.js 16 (App Router), React 19, TypeScript
+- **Styling**: Tailwind CSS
+- **Ikon**: Lucide React
+- **Backend & Data**: Next.js API Routes & In-Memory Data Service
+
+---
+
+## Memulai (Quick Start)
+
+### 1. Prasyarat
+Pastikan Node.js (versi 18.x atau lebih baru) dan npm sudah terpasang.
+
+### 2. Instalasi Dependensi
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Menjalankan Server Pengembangan
+```bash
+npm run dev
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Buka peramban dan akses:
+- **Login Petugas/Panitia**: `http://localhost:3000/login`
+- **Portal Publik Krama**: `http://localhost:3000/public`
+- **Layar TV Kiosk**: `http://localhost:3000/kiosk`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Lisensi
+Hak Cipta © 2026 Pura Dalem Desa Adat Metra. Seluruh hak cipta dilindungi undang-undang.

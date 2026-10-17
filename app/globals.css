@@ -2,25 +2,82 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #111827;
+  --surface-muted: #f9fafb;
+  --border-color: #e5e7eb;
+  --color-primary: #2563eb;
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-color: #ffffff;
+  color: #111827;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Strict No Gradients Rule: Ensure flat solid rendering */
+*, *::before, *::after {
+  background-image: none !important;
+}
+
+/* Custom scrollbar for clean tabular data view */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f9fafb;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Numeric alignment utility for financial ledgers */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Keyframes for TV Kiosk scrolling marquee */
+@keyframes marquee-vertical {
+  0% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(-50%);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.animate-marquee-vertical {
+  animation: marquee-vertical 30s linear infinite;
+}
+
+.animate-marquee-vertical:hover {
+  animation-play-state: paused;
+}
+
+/* Print Cleanliness Safeguards */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  /* Hide dashboard navigation, floating widgets, and background when a modal is active */
+  header, nav, aside {
+    display: none !important;
+  }
 }
