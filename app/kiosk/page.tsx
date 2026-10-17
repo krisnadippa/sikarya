@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { TvKioskView } from "@/app/components/kiosk/TvKioskView";
 import { ApiClient } from "@/app/lib/api";
 import {
@@ -17,6 +18,7 @@ import {
 } from "@/app/types";
 
 export default function KioskPage() {
+  const router = useRouter();
   const [transactions, setTransactions] = useState<Transaction[]>(initialTransactions);
   const [puniaList, setPuniaList] = useState<PuniaDonation[]>(initialPuniaDonations);
   const [kpiSummary, setKpiSummary] = useState<DashboardKPISummary>(initialKPISummary);
@@ -46,6 +48,7 @@ export default function KioskPage() {
         expenseDistribution={expenseDistribution}
         transactions={transactions}
         puniaList={puniaList}
+        onExitKiosk={() => router.push("/")}
       />
     </div>
   );
